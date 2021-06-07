@@ -28,9 +28,6 @@ class Simulation:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Robot TopoMap Simulation by Adam")
 
-        # Environment layout
-        #self.layout = self.settings.layout
-
         # Target points
         self.targets = []
 
