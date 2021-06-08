@@ -36,11 +36,11 @@ class Cluster(Sprite):
         self.slices = {self.centerX: set()}
         self.slices[self.centerX].add(self.centerY)
 
-        # Neighbours
+        # Neighbouring clusters
         self.neighbours = set()
 
-        # Navigation nodes
-        self.navigation_nodes = set()
+        # Navigation node positions
+        self.navigation_node_positions = set()
 
     def _update_outermost_x_coords(self, new_cells):
         """Updates the coordinates of outermost cells in X direction"""
@@ -121,9 +121,15 @@ class Cluster(Sprite):
         self.centerX = np.mean(x_coords)
         self.centerY = np.mean(y_coords)
 
-    def get_convex_hull(self):
-        """Returns the convex hull of the cell cluster"""
-        return ConvexHull(self.cells)
+    def point_in_cluster(self, point, tolerance=1e-12):
+        """Checks if a point falls into a given convex hull of the cluster. Returns True or False.
+        Implemented from: https://stackoverflow.com/a/42165596"""
+        # Calculate the convex hull for the cluster
+        hull = ConvexHull(list(self.cells))
+        # Check if the point is in the hull
+        return all((np.dot(eq[:-1], point) + eq[-1] <= tolerance) for eq in hull.equations)
+
+
 
 
 

@@ -28,9 +28,6 @@ class Simulation:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Robot TopoMap Simulation by Adam")
 
-        # Target points
-        self.targets = []
-
         # Autonomous exploration
         self.exploration_steps = self.settings.ae_exploration_steps
 
@@ -255,6 +252,10 @@ class Simulation:
                     self.settings.autonomous_exploration = False
                     # Turn on the autonomous navigation
                     self.settings.autonomous_navigation = True
+        elif self.settings.autonomous_navigation and self.robot.target_reached:
+            if self.settings.layout["Targets"]:
+                self.map.path_planner((self.robot.odo_x, self.robot.odo_y), self.settings.layout["Targets"].pop())
+
 
         # Check if the robot is not sensing and the target is not reached
         if not self.robot.target_reached and not self.robot.sensing:

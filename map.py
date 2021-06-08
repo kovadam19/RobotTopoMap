@@ -7,6 +7,7 @@ from scipy.spatial import ConvexHull
 
 from cluster import Cluster
 from obstacle import Obstacle
+from path_node import PathNode
 
 
 class Map:
@@ -45,8 +46,8 @@ class Map:
         # Explored trajectory points
         self.trajectory_points = [(0, 0)]
 
-        # Target points
-        self.targets = []
+        # Path points for autonomous navigation
+        self.path = []
 
         # Create the rect for the map background
         self.map_screen_rect = pygame.Rect(self.x, self.y, 800, 800)
@@ -428,7 +429,7 @@ class Map:
             # Update the center point
             cluster.update_center_point()
             # Add the center point to the navigation points
-            cluster.navigation_nodes.add((cluster.centerX, cluster.centerY))
+            cluster.navigation_node_positions.add((cluster.centerX, cluster.centerY))
             # Go through all the neighbouring clusters
             for neighbour_id in cluster.neighbours:
                 # Calculate the intersecting cells with the neighbour
@@ -440,7 +441,105 @@ class Map:
                 mean_x = np.average(x_coords)
                 mean_y = np.average(y_coords)
                 # Add the portal point to the navigation points
-                cluster.navigation_nodes.add((mean_x, mean_y))
+                cluster.navigation_node_positions.add((mean_x, mean_y))
+
+    def path_planner(self, start, end):
+        """
+            Plans a path from the current location to the actual target point
+            Implementation of A* search algorithm
+            Reference1: https://brilliant.org/wiki/a-star-search/
+            Reference2: https://towardsdatascience.com/a-star-a-search-algorithm-eb495fb156bb
+        """
+        # Find the cluster that contains the starting and end points
+        start_cluster = None
+        end_cluster = None
+        for i in range(len(self.clusters)):
+            if self.clusters[i].point_in_cluster(start) and start_cluster is None:
+                start_cluster = i
+            if self.clusters[i].point_in_cluster(end) and end_cluster is None:
+                end_cluster = i
+
+        # Check if the start and end point fall into the same cluster
+        if start_cluster == end_cluster:
+            self.path.append(end)
+        else:
+            # Add the start and end nodes to the cluster temporarily
+            self.clusters[start_cluster].navigation_node_positions.add(start)
+            self.clusters[end_cluster].navigation_node_positions.add(end)
+
+            # Start an open and closed list
+            open_list = []
+            closed_list = []
+
+            # Create starting and end nodes
+            starting_node = PathNode(start_cluster, None, start)
+            end_node = PathNode(end_cluster, None, end)
+
+            # Add starting node to the open list
+            open_list.append(starting_node)
+
+            # Iterate until we reach the end node
+            while True:
+                # Find the lowest f score in the open list
+                f_scores = [node.f for node in open_list]
+                min_f_score = min(f_scores)
+                for node in open_list:
+                    if node.f == min_f_score:
+                        current_node = node
+
+                # Remove the current node from the open list
+                open_list.remove(current_node)
+
+                # Check if this is the end node
+                if current_node == end_node:
+                    # Extract the path from the closed list
+                    parent = current_node
+                    while parent is not None:
+                        self.path.append(parent.position)
+                        parent = parent.parent_node
+                    self.path.reverse()
+                    break
+                else:
+                    # Put the current node into the closed list
+                    closed_list.append(current_node)
+                    # Search for neighbouring clusters involving the current cluster
+                    neighbour_clusters = [current_node.cluster, *self.clusters[current_node.cluster].neighbours]
+                    # Search neighbouring nodes within the neighbouring clusters
+                    neighbour_nodes = []
+                    for neighbour_cluster in neighbour_clusters:
+                        for node_position in self.clusters[neighbour_cluster].navigation_node_positions:
+                            if node_position != current_node.position:
+                                # Create a new node
+                                new_node = PathNode(neighbour_cluster, current_node, node_position)
+                                # Calculate the cost from the starting node to the new node
+                                local_x = new_node.position[0] - starting_node.position[0]
+                                local_y = new_node.position[1] - starting_node.position[1]
+                                new_node.g = np.sqrt(local_x ** 2 + local_y ** 2)
+                                # Calculate the cost from the new node to the end node (heuristics - Euclidean Distance)
+                                local_x = end_node.position[0] - new_node.position[0]
+                                local_y = end_node.position[1] - new_node.position[1]
+                                new_node.h = np.sqrt(local_x ** 2 + local_y ** 2)
+                                # Calculate the total estimated cost
+                                new_node.f = new_node.g + new_node.h
+                                # Add the node to the neighbouring nodes
+                                neighbour_nodes.append(new_node)
+                    # Go through all the neighbour nodes
+                    for node in neighbour_nodes:
+                        if node.g < current_node.g and node in closed_list:
+                            index = closed_list.index(node)
+                        # In this case the current node is the parent of the node on the open list
+                        elif current_node.g < node.g and node in open_list:
+                            index = open_list.index(node)
+                            open_list[index].parent_node = current_node
+                        # If the node is not on the lists it is added to the open list
+                        elif node not in closed_list and node not in open_list:
+                            open_list.append(node)
+
+            # Remove the start and end nodes from the clusters
+            self.clusters[start_cluster].navigation_node_positions.remove(start)
+            self.clusters[end_cluster].navigation_node_positions.remove(end)
+
+        print(self.path)
 
     def draw_map(self):
         """Draws the map to the screen"""
@@ -518,7 +617,7 @@ class Map:
 
         # Draw navigation nodes
         for cluster in self.clusters:
-            for node in cluster.navigation_nodes:
+            for node in cluster.navigation_node_positions:
                 x = (node[0] * self.scale) + self.centerX
                 y = (node[1] * self.scale) + self.centerY
                 pygame.draw.circle(self.screen, (255, 0, 0), (x, y), self.settings.map_target_size)
