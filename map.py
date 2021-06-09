@@ -492,6 +492,7 @@ class Map:
 
                 # Check if this is the end node
                 if current_node == end_node:
+                    print("Closed list ", closed_list)
                     # Extract the path from the closed list
                     parent = current_node
                     while parent is not None:
@@ -627,3 +628,19 @@ class Map:
         x = (self.robot.odo_x * self.scale) + self.centerX
         y = (self.robot.odo_y * self.scale) + self.centerY
         pygame.draw.circle(self.screen, (0, 255, 0), (x, y), self.settings.map_target_size)
+
+        # Draw targets for autonomous navigation
+        for x, y in self.settings.layout["Targets"]:
+            x = (x * self.scale) + self.centerX
+            y = (y * self.scale) + self.centerY
+            pygame.draw.rect(self.screen, (255, 0, 0), pygame.Rect(x - self.settings.map_target_size / 2, y - self.settings.map_target_size / 2, self.settings.map_target_size, self.settings.map_target_size))
+
+        # Draw navigation path
+        if self.path:
+            for x, y in self.path:
+                x = (x * self.scale) + self.centerX
+                y = (y * self.scale) + self.centerY
+                pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(x - self.settings.map_target_size / 2,
+                                                                           y - self.settings.map_target_size / 2,
+                                                                           self.settings.map_target_size,
+                                                                           self.settings.map_target_size))

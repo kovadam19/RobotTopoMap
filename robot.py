@@ -28,7 +28,7 @@ class Robot(Sprite):
         # Initialize precise global position and local orientation
         self.init_x = init_x
         self.init_y = init_y
-        self.init_o = random() * 2.0 * np.pi #random() * 2.0 * np.pi
+        self.init_o = random() * 2.0 * np.pi
 
         # Actual global position and local orientation
         self.x = copy.deepcopy(self.init_x)

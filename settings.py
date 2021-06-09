@@ -18,9 +18,9 @@ class Settings:
         self.layout_object_size = 38
         self.layout_robot_size = 76
         self.layout_grids = False
-        self.layout = {"Objects": set(),# (300, 300), (500, 300), (500, 500), (300, 500)
+        self.layout = {"Objects": set(),
                        "Robots": set(),
-                       "Targets": [(0, 0)]}
+                       "Targets": []}
 
         # Robot settings
         self.robot_rotation_increment = 0.0872665  # radians
@@ -78,7 +78,7 @@ class Settings:
         self.autonomous_navigation = False
 
         # Autonomous exploration settings
-        self.ae_exploration_steps = 20
+        self.ae_exploration_steps = 15
         self.ae_safety_zone_multiplier = 0.6  # Size of the robot is multiplied by this
         self.ae_counter_limit = 100  # Limit of tries with one setting of requirements (angle, distance)
         self.ae_initial_angle = 0.349066  # 20 deg (0.349066 rad)

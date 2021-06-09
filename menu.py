@@ -26,6 +26,7 @@ class Menu:
         self.prep_layout_design_menu()
         self.prep_manual_control()
         self.prep_autonomous_exp()
+        self.prep_autonomous_navigation()
 
     def prep_menu_line(self):
         """Prepares the menu line"""
@@ -134,6 +135,18 @@ class Menu:
         self.exp_rect.left = self.obstacle_rect.left - 3 * self.line_gap
         self.exp_rect.top = self.obstacle_rect.bottom + self.line_gap
 
+    def prep_autonomous_navigation(self):
+        """Prepares the menu for autonomous navigation"""
+        a_nav_str = "Autonomous Navigation (A)"
+        if self.settings.autonomous_navigation:
+            a_nav_color = self.text_color_selected
+        else:
+            a_nav_color = self.text_color_basic
+        # Prepare the image and positions it on the screen
+        self.nav_image = self.font.render(a_nav_str, True, a_nav_color, self.bg_color)
+        self.nav_rect = self.nav_image.get_rect()
+        self.nav_rect.left = self.exp_rect.left
+        self.nav_rect.top = self.exp_rect.bottom + self.line_gap
 
     def show_menu(self):
         """Shows the menu"""
@@ -150,3 +163,4 @@ class Menu:
             self.screen.blit(self.cluster_image, self.cluster_rect)
             self.screen.blit(self.obstacle_image, self.obstacle_rect)
             self.screen.blit(self.exp_image, self.exp_rect)
+            self.screen.blit(self.nav_image, self.nav_rect)

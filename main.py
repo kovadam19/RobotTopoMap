@@ -97,7 +97,6 @@ class Simulation:
                 self.menu.prep_manual_control()
                 self.menu.prep_autonomous_exp()
 
-
             # Update the screen
             self._update_screen()
 
@@ -135,6 +134,11 @@ class Simulation:
                     self.settings.autonomous_navigation = False
                     self.settings.manual_control = False
                     self.settings.autonomous_exploration = True
+                elif event.key == pygame.K_a:
+                    self.settings.layout_design = False
+                    self.settings.manual_control = False
+                    self.settings.autonomous_exploration = False
+                    self.settings.autonomous_navigation = True
                 elif event.key == pygame.K_l:
                     self.settings.autonomous_navigation = False
                     self.settings.manual_control = False
@@ -164,6 +168,25 @@ class Simulation:
                         for coords in self.settings.layout["Objects"]:
                             new_object = Object(self, *coords)
                             self.objects.add(new_object)
+                # Middle mouse click
+                if event.button == 2:
+                    x, y = pygame.mouse.get_pos()
+                    x_in_range = 0 + self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
+                    y_in_range = 0 + self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
+                    if x_in_range and y_in_range:
+                        # Calculate the coordinates based on the initial position of the robot
+                        # Transfer the coordinates into the origin of the robot's coordinate system
+                        loc_x = x - self.robot.init_x
+                        loc_y = y - self.robot.init_y
+
+                        # Rotate the coordinates in the robot's coordinate system
+                        theta = self.robot.init_o + (np.pi / 2)
+                        rot_x = loc_x * np.cos(theta) - loc_y * np.sin(theta)
+                        rot_y = loc_x * np.sin(theta) + loc_y * np.cos(theta)
+
+                        # Add the coordinates to the layout
+                        self.settings.layout["Targets"].clear()
+                        self.settings.layout["Targets"].append((rot_x, rot_y))
                 # Right mouse click
                 if event.button == 3:
                     x, y = pygame.mouse.get_pos()
@@ -172,9 +195,11 @@ class Simulation:
                     if x_in_range and y_in_range:
                         self.settings.layout["Robots"].clear()
                         self.settings.layout["Robots"].add((x, y))
-                        self.robots = pygame.sprite.Group()
+                        self.robots.empty()
                         for coords in self.settings.layout["Robots"]:
                             self.robot = Robot(self, *coords)
+                            self.map.robot = self.robot
+                            self.display.robot = self.robot
                             self.robots.add(self.robot)
 
     def _load_layout_from_file(self):
@@ -201,9 +226,11 @@ class Simulation:
                 y = int(y)
                 self.settings.layout["Robots"].clear()
                 self.settings.layout["Robots"].add((x, y))
-                self.robots = pygame.sprite.Group()
+                self.robots.empty()
                 for coords in self.settings.layout["Robots"]:
                     self.robot = Robot(self, *coords)
+                    self.map.robot = self.robot
+                    self.display.robot = self.robot
                     self.robots.add(self.robot)
 
     def _update_robot(self):
@@ -250,8 +277,6 @@ class Simulation:
                     self.settings.map_draw_all_clusters = True
                     # Turn off the autonomous exploration
                     self.settings.autonomous_exploration = False
-                    # Turn on the autonomous navigation
-                    self.settings.autonomous_navigation = True
         elif self.settings.autonomous_navigation and self.robot.target_reached:
             if self.settings.layout["Targets"]:
                 self.map.path_planner((self.robot.odo_x, self.robot.odo_y), self.settings.layout["Targets"].pop())
