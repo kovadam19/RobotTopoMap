@@ -475,11 +475,16 @@ class Map:
             starting_node = PathNode(start_cluster, None, start)
             end_node = PathNode(end_cluster, None, end)
 
+            # Configure the starting node
+            starting_node.g = 0
+            starting_node.h = np.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2)
+            starting_node.f = starting_node.g + starting_node.h
+
             # Add starting node to the open list
             open_list.append(starting_node)
 
             # Iterate until we reach the end node
-            while True:
+            while open_list:
                 # Find the lowest f score in the open list
                 f_scores = [node.f for node in open_list]
                 min_f_score = min(f_scores)
@@ -487,35 +492,39 @@ class Map:
                     if node.f == min_f_score:
                         current_node = node
 
-                # Remove the current node from the open list
-                open_list.remove(current_node)
-
                 # Check if this is the end node
                 if current_node == end_node:
-                    print("Closed list ", closed_list)
-                    # Extract the path from the closed list
+                    # Extract the path from the nodes
                     parent = current_node
                     while parent is not None:
                         self.path.append(parent.position)
                         parent = parent.parent_node
                     self.path.reverse()
                     break
-                else:
-                    # Put the current node into the closed list
-                    closed_list.append(current_node)
-                    # Search for neighbouring clusters involving the current cluster
-                    neighbour_clusters = [current_node.cluster, *self.clusters[current_node.cluster].neighbours]
-                    # Search neighbouring nodes within the neighbouring clusters
-                    neighbour_nodes = []
-                    for neighbour_cluster in neighbour_clusters:
+
+                # Remove the current node from the open list
+                open_list.remove(current_node)
+
+                # Put the current node into the closed list
+                closed_list.append(current_node)
+
+                # Search for neighbouring clusters involving the current cluster
+                neighbour_clusters = [current_node.cluster, *self.clusters[current_node.cluster].neighbours]
+                # Search neighbouring nodes within the neighbouring clusters
+                neighbour_nodes = []
+                for neighbour_cluster in neighbour_clusters:
+                    # Check if the current node belongs to the neighbouring cluster too (it is a portal node between the two clusters)
+                    if current_node.position in self.clusters[neighbour_cluster].navigation_node_positions:
+                        # Go through the neighbouring nodes
                         for node_position in self.clusters[neighbour_cluster].navigation_node_positions:
+                            # Check if the node of interest is not the current node
                             if node_position != current_node.position:
                                 # Create a new node
                                 new_node = PathNode(neighbour_cluster, current_node, node_position)
-                                # Calculate the cost from the starting node to the new node
-                                local_x = new_node.position[0] - starting_node.position[0]
-                                local_y = new_node.position[1] - starting_node.position[1]
-                                new_node.g = np.sqrt(local_x ** 2 + local_y ** 2)
+                                # Calculate the cost from the parent node to the new node
+                                local_x = new_node.position[0] - current_node.position[0]
+                                local_y = new_node.position[1] - current_node.position[1]
+                                new_node.g = np.sqrt(local_x ** 2 + local_y ** 2) + current_node.g
                                 # Calculate the cost from the new node to the end node (heuristics - Euclidean Distance)
                                 local_x = end_node.position[0] - new_node.position[0]
                                 local_y = end_node.position[1] - new_node.position[1]
@@ -524,23 +533,28 @@ class Map:
                                 new_node.f = new_node.g + new_node.h
                                 # Add the node to the neighbouring nodes
                                 neighbour_nodes.append(new_node)
-                    # Go through all the neighbour nodes
-                    for node in neighbour_nodes:
-                        if node.g < current_node.g and node in closed_list:
-                            index = closed_list.index(node)
-                        # In this case the current node is the parent of the node on the open list
-                        elif current_node.g < node.g and node in open_list:
-                            index = open_list.index(node)
-                            open_list[index].parent_node = current_node
-                        # If the node is not on the lists it is added to the open list
-                        elif node not in closed_list and node not in open_list:
-                            open_list.append(node)
+
+                # Go through all the neighbour nodes
+                for node in neighbour_nodes:
+                    # Check if the node is in the closed list
+                    if node in closed_list:
+                        continue
+                    # Check if the node is in the open list
+                    elif node in open_list:
+                        index = open_list.index(node)
+                        open_node = open_list[index]
+                        # Check if the current neighbour has a lower g value than the one on the list
+                        if node.g < open_node.g:
+                            # Update the node in the open list
+                            open_node.g = node.g
+                            open_node.parent_node = current_node
+                    # If the node is not on the lists it is added to the open list
+                    elif node not in closed_list and node not in open_list:
+                        open_list.append(node)
 
             # Remove the start and end nodes from the clusters
             self.clusters[start_cluster].navigation_node_positions.remove(start)
             self.clusters[end_cluster].navigation_node_positions.remove(end)
-
-        print(self.path)
 
     def draw_map(self):
         """Draws the map to the screen"""

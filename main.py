@@ -174,18 +174,17 @@ class Simulation:
                     x_in_range = 0 + self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
                     y_in_range = 0 + self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
                     if x_in_range and y_in_range:
-                        # Calculate the coordinates based on the initial position of the robot
+                        # Clear the targets and the path
+                        self.settings.layout["Targets"].clear()
+                        self.map.path.clear()
                         # Transfer the coordinates into the origin of the robot's coordinate system
                         loc_x = x - self.robot.init_x
                         loc_y = y - self.robot.init_y
-
                         # Rotate the coordinates in the robot's coordinate system
                         theta = self.robot.init_o + (np.pi / 2)
                         rot_x = loc_x * np.cos(theta) - loc_y * np.sin(theta)
                         rot_y = loc_x * np.sin(theta) + loc_y * np.cos(theta)
-
                         # Add the coordinates to the layout
-                        self.settings.layout["Targets"].clear()
                         self.settings.layout["Targets"].append((rot_x, rot_y))
                 # Right mouse click
                 if event.button == 3:
