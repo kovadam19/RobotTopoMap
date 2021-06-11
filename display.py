@@ -1,5 +1,6 @@
 import pygame
 
+
 class Display:
     """A class to report information"""
 

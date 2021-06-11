@@ -42,16 +42,27 @@ class Settings:
         self.lidar_sensing_counter = 6
 
         # Map settings
-        self.map_color = (0, 0, 0)
-        self.map_lidar_color = (255, 255, 255)
         self.map_cell_size = 20
         self.map_font_size = 16
-        self.map_text_color = (0, 255, 0)
         self.map_target_size = 8
-        self.map_coverage_threshold = 0.9
+        self.map_coverage_threshold = 0.95
+        self.map_navigation_rect_size = 12
+        self.map_color = (0, 0, 0)
+        self.map_lidar_color = (255, 255, 255)
+        self.map_robot_position_color = (0, 255, 0)
+        self.map_old_exp_point_color = (0, 0, 255)
+        self.map_new_exp_point_color = (255, 255, 0)
+        self.map_navigation_node_color = (255, 0, 0)
+        self.map_navigation_path_color = (255, 255, 255)
+        self.map_navigation_target_color = (0, 255, 0)
+        self.map_text_color = (0, 255, 0)
+        self.map_x_axis_color = (255, 0, 0)
+        self.map_y_axis_color = (0, 255, 0)
         self.map_draw_lidar_points = False
+        self.map_draw_obstacles = True
         self.map_draw_all_clusters = False
-        self.map_draw_trajectory_points = True
+        self.map_draw_last_cluster = True
+        self.map_draw_exploration_points = True
 
         # Display settings
         self.display_bg_color = (0, 0, 0)
@@ -78,10 +89,15 @@ class Settings:
         self.autonomous_navigation = False
 
         # Autonomous exploration settings
-        self.ae_exploration_steps = 15
+        self.ae_exploration_steps = 30
         self.ae_safety_zone_multiplier = 0.6  # Size of the robot is multiplied by this
         self.ae_counter_limit = 100  # Limit of tries with one setting of requirements (angle, distance)
         self.ae_initial_angle = 0.349066  # 20 deg (0.349066 rad)
         self.ae_angle_increment = 0.0872665  # 5 deg (0.0872665 rad)
         self.ae_min_distance = 40  # Minimum distance that the robot has to move
         self.ae_distance_increment = 1
+
+        # Save settings
+        self.save_folder = "C:/Users/kovad/Desktop/Save/"
+        self.save_image_name = "image"
+        self.save_interval = 100

@@ -101,10 +101,10 @@ class Map:
                 for obstacle_cell in new_obstacle:
                     for occupied_cell in occupied_grid_cells:
                         # Calculate the distance in X and Y directions
-                        distanceX = abs(occupied_cell[0] - obstacle_cell[0])
-                        distanceY = abs(occupied_cell[1] - obstacle_cell[1])
+                        distance_x = abs(occupied_cell[0] - obstacle_cell[0])
+                        distance_y = abs(occupied_cell[1] - obstacle_cell[1])
                         # If the distance is smaller then two times the cell size in X and Y direction and the occupied cell is not assigned to the new obstacle
-                        if distanceX < (self.cell_size * 2) and distanceY < (self.cell_size * 2) and occupied_cell not in new_obstacle:
+                        if distance_x < (self.cell_size * 2) and distance_y < (self.cell_size * 2) and occupied_cell not in new_obstacle:
                             # Add the cell to the new obstacle and remove it from the occupied grid cell list
                             new_obstacle.append(occupied_cell)
                             occupied_grid_cells.remove(occupied_cell)
@@ -273,8 +273,10 @@ class Map:
         return new_rays
 
     def _line_rectangle_intersection(self, x_zero, y_zero, delta_x, delta_y, x_min, y_min, x_max, y_max, collision_point=False):
-        """Checks if a line intersects with a rectangle by the Liang-Barsky algorithm.
-        Implemented from https://gist.github.com/ChickenProp/3194723"""
+        """
+            Checks if a line intersects with a rectangle by the Liang-Barsky algorithm.
+            Reference: https://gist.github.com/ChickenProp/3194723
+        """
         # Initialization
         p = [-delta_x, delta_x, -delta_y, delta_y]
         q = [x_zero - x_min, x_max - x_zero, y_zero - y_min, y_max - y_zero]
@@ -349,10 +351,10 @@ class Map:
                         # If there is no obstacles in the convex hull of the two clusters
                         if not obstacle_in_hull:
                             # Calculate the center of the convex hull
-                            centerX = np.mean(hull.points[hull.vertices, 0])
-                            centerY = np.mean(hull.points[hull.vertices, 1])
+                            center_x = np.mean(hull.points[hull.vertices, 0])
+                            center_y = np.mean(hull.points[hull.vertices, 1])
                             # Create a new cluster
-                            new_cluster = Cluster(centerX, centerY)
+                            new_cluster = Cluster(center_x, center_y)
                             # Calculate the union of the two clusters
                             new_cells = cluster_i.cells.union(cluster_j.cells)
                             # Add the cells to the new cluster
@@ -375,8 +377,10 @@ class Map:
                 break
 
     def _point_in_hull(self, point, hull, tolerance=1e-12):
-        """Checks if a point falls into a given convex hull. Returns True or False.
-        Implemented from: https://stackoverflow.com/a/42165596"""
+        """
+            Checks if a point falls into a given convex hull. Returns True or False.
+            Reference: https://stackoverflow.com/a/42165596
+        """
         return all((np.dot(eq[:-1], point) + eq[-1] <= tolerance) for eq in hull.equations)
 
     def remove_covered_clusters(self):
@@ -449,6 +453,7 @@ class Map:
             Implementation of A* search algorithm
             Reference1: https://brilliant.org/wiki/a-star-search/
             Reference2: https://towardsdatascience.com/a-star-a-search-algorithm-eb495fb156bb
+            Reference3: https://isaaccomputerscience.org/concepts/dsa_search_a_star
         """
         # Find the cluster that contains the starting and end points
         start_cluster = None
@@ -499,7 +504,6 @@ class Map:
                     while parent is not None:
                         self.path.append(parent.position)
                         parent = parent.parent_node
-                    self.path.reverse()
                     break
 
                 # Remove the current node from the open list
@@ -562,57 +566,53 @@ class Map:
         pygame.draw.rect(self.screen, self.settings.map_color, self.map_screen_rect)
 
         # Draw obstacles
-        for obstacle in self.obstacles:
-            x = (obstacle.x * self.scale) + self.centerX
-            y = (obstacle.y * self.scale) + self.centerY
-            pygame.draw.rect(self.screen, obstacle.color, pygame.Rect(x, y, obstacle.sizeX, obstacle.sizeY))
+        if self.settings.map_draw_obstacles:
+            for obstacle in self.obstacles:
+                x, y = self._calculate_position_on_map(obstacle.x, obstacle.y)
+                pygame.draw.rect(self.screen, obstacle.color, pygame.Rect(x, y, obstacle.sizeX, obstacle.sizeY))
 
         # Draw the lidar detection points
         if self.settings.map_draw_lidar_points:
-            for cell in self.lidar_detection_points:
-                x = (cell[0] * self.scale) + self.centerX
-                y = (cell[1] * self.scale) + self.centerY
+            for cell_x, cell_y in self.lidar_detection_points:
+                x, y = self._calculate_position_on_map(cell_x, cell_y)
                 pygame.draw.circle(self.screen, self.settings.map_lidar_color, (x, y), 1)
 
         # Draw the clusters
         if self.clusters:
             if self.settings.map_draw_all_clusters:
                 for cluster in self.clusters:
-                    for cell in cluster.cells:
-                        x = (cell[0] * self.scale) + self.centerX
-                        y = (cell[1] * self.scale) + self.centerY
+                    for cell_x, cell_y in cluster.cells:
+                        x, y = self._calculate_position_on_map(cell_x, cell_y)
                         pygame.draw.rect(self.screen, cluster.color, pygame.Rect(x, y, self.cell_size, self.cell_size))
-            else:
+            elif self.settings.map_draw_last_cluster:
                 cluster = self.clusters[-1]
-                for cell in cluster.cells:
-                    x = (cell[0] * self.scale) + self.centerX
-                    y = (cell[1] * self.scale) + self.centerY
+                for cell_x, cell_y in cluster.cells:
+                    x, y = self._calculate_position_on_map(cell_x, cell_y)
                     pygame.draw.rect(self.screen, cluster.color, pygame.Rect(x, y, self.cell_size, self.cell_size))
 
         # Draw the X-axis of the robot's local coordinate system
-        pygame.draw.line(self.screen, (255, 0, 0), (self.centerX, self.centerY), (self.centerX + 50, self.centerY), 2)
-        pygame.draw.line(self.screen, (255, 0, 0), (self.centerX + 50, self.centerY), (self.centerX + 40, self.centerY - 5), 2)
-        pygame.draw.line(self.screen, (255, 0, 0), (self.centerX + 50, self.centerY), (self.centerX + 40, self.centerY + 5), 2)
+        pygame.draw.line(self.screen, self.settings.map_x_axis_color, (self.centerX, self.centerY), (self.centerX + 50, self.centerY), 2)
+        pygame.draw.line(self.screen, self.settings.map_x_axis_color, (self.centerX + 50, self.centerY), (self.centerX + 40, self.centerY - 5), 2)
+        pygame.draw.line(self.screen, self.settings.map_x_axis_color, (self.centerX + 50, self.centerY), (self.centerX + 40, self.centerY + 5), 2)
         self.x_image = self.font.render("X", True, self.text_color, self.settings.map_color)
         self.x_rect = self.x_image.get_rect()
         self.x_rect.midbottom = (self.centerX + 45, self.centerY - 10)
         self.screen.blit(self.x_image, self.x_rect)
 
         # Draw the Y-axis of the robot's local coordinate system
-        pygame.draw.line(self.screen, (0, 255, 0), (self.centerX, self.centerY), (self.centerX, self.centerY + 50), 2)
-        pygame.draw.line(self.screen, (0, 255, 0), (self.centerX, self.centerY + 50), (self.centerX - 5, self.centerY + 40), 2)
-        pygame.draw.line(self.screen, (0, 255, 0), (self.centerX, self.centerY + 50), (self.centerX + 5, self.centerY + 40), 2)
+        pygame.draw.line(self.screen, self.settings.map_y_axis_color, (self.centerX, self.centerY), (self.centerX, self.centerY + 50), 2)
+        pygame.draw.line(self.screen, self.settings.map_y_axis_color, (self.centerX, self.centerY + 50), (self.centerX - 5, self.centerY + 40), 2)
+        pygame.draw.line(self.screen, self.settings.map_y_axis_color, (self.centerX, self.centerY + 50), (self.centerX + 5, self.centerY + 40), 2)
         self.y_image = self.font.render("Y", True, self.text_color, self.settings.map_color)
         self.y_rect = self.y_image.get_rect()
         self.y_rect.midright = (self.centerX - 10, self.centerY + 45)
         self.screen.blit(self.y_image, self.y_rect)
 
         # Draw the trajectory points already explored by the robot
-        if self.settings.map_draw_trajectory_points:
+        if self.settings.map_draw_exploration_points:
             for point in self.trajectory_points[0:-1]:
-                x = (point[0] * self.scale) + self.centerX
-                y = (point[1] * self.scale) + self.centerY
-                pygame.draw.circle(self.screen, (0, 0, 255), (x, y), self.settings.map_target_size)
+                x, y = self._calculate_position_on_map(point[0], point[1])
+                pygame.draw.circle(self.screen, self.settings.map_old_exp_point_color, (x, y), self.settings.map_target_size)
                 # Drawing the index of the point on the map
                 index_str = str(self.trajectory_points.index(point))
                 self.index_image = self.font.render(index_str, True, self.text_color, self.settings.map_color)
@@ -621,9 +621,8 @@ class Map:
                 self.screen.blit(self.index_image, self.index_rect)
 
             # Draw the last trajectory point and its index on the map
-            x = (self.trajectory_points[-1][0] * self.scale) + self.centerX
-            y = (self.trajectory_points[-1][1] * self.scale) + self.centerY
-            pygame.draw.circle(self.screen, (255, 255, 0), (x, y), self.settings.map_target_size)
+            x, y = self._calculate_position_on_map(self.trajectory_points[-1][0], self.trajectory_points[-1][1])
+            pygame.draw.circle(self.screen, self.settings.map_new_exp_point_color, (x, y), self.settings.map_target_size)
             index_str = str(len(self.trajectory_points) - 1)
             self.index_image = self.font.render(index_str, True, self.text_color, self.settings.map_color)
             self.index_rect = self.index_image.get_rect()
@@ -632,29 +631,39 @@ class Map:
 
         # Draw navigation nodes
         for cluster in self.clusters:
-            for node in cluster.navigation_node_positions:
-                x = (node[0] * self.scale) + self.centerX
-                y = (node[1] * self.scale) + self.centerY
-                pygame.draw.circle(self.screen, (255, 0, 0), (x, y), self.settings.map_target_size)
-                pygame.draw.circle(self.screen, cluster.color, (x, y), self.settings.map_target_size - 2)
+            for node_x, node_y in cluster.navigation_node_positions:
+                x, y = self._calculate_position_on_map(node_x, node_y)
+                pygame.draw.circle(self.screen, self.settings.map_navigation_node_color, (x, y), self.settings.map_target_size)
 
         # Draw the robot's current location
-        x = (self.robot.odo_x * self.scale) + self.centerX
-        y = (self.robot.odo_y * self.scale) + self.centerY
-        pygame.draw.circle(self.screen, (0, 255, 0), (x, y), self.settings.map_target_size)
+        x, y = self._calculate_position_on_map(self.robot.odo_x, self.robot.odo_y)
+        pygame.draw.circle(self.screen, self.settings.map_robot_position_color, (x, y), self.settings.map_target_size)
 
         # Draw targets for autonomous navigation
-        for x, y in self.settings.layout["Targets"]:
-            x = (x * self.scale) + self.centerX
-            y = (y * self.scale) + self.centerY
-            pygame.draw.rect(self.screen, (255, 0, 0), pygame.Rect(x - self.settings.map_target_size / 2, y - self.settings.map_target_size / 2, self.settings.map_target_size, self.settings.map_target_size))
+        for target_x, target_y in self.settings.layout["Targets"]:
+            x, y = self._calculate_position_on_map(target_x, target_y)
+            rect = pygame.Rect(x - self.settings.map_navigation_rect_size / 2,
+                               y - self.settings.map_navigation_rect_size / 2,
+                               self.settings.map_navigation_rect_size,
+                               self.settings.map_navigation_rect_size)
+            pygame.draw.rect(self.screen, self.settings.map_navigation_target_color, rect)
 
-        # Draw navigation path
+        # Draw points of the navigation path
         if self.path:
-            for x, y in self.path:
-                x = (x * self.scale) + self.centerX
-                y = (y * self.scale) + self.centerY
-                pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(x - self.settings.map_target_size / 2,
-                                                                           y - self.settings.map_target_size / 2,
-                                                                           self.settings.map_target_size,
-                                                                           self.settings.map_target_size))
+            for path_x, path_y in self.path:
+                x, y = self._calculate_position_on_map(path_x, path_y)
+                rect = pygame.Rect(x - self.settings.map_navigation_rect_size / 2,
+                                   y - self.settings.map_navigation_rect_size / 2,
+                                   self.settings.map_navigation_rect_size,
+                                   self.settings.map_navigation_rect_size)
+                pygame.draw.rect(self.screen, self.settings.map_navigation_path_color, rect)
+
+    def _calculate_position_on_map(self, x, y):
+        """
+            Calculates the position of a point on the map based on the scale and center of the map
+            Returns the new X & Y coordinates
+        """
+        new_x = (x * self.scale) + self.centerX
+        new_y = (y * self.scale) + self.centerY
+        return new_x, new_y
+

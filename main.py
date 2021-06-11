@@ -1,6 +1,5 @@
 import sys
 import pygame
-from time import sleep
 import numpy as np
 import random
 
@@ -33,6 +32,9 @@ class Simulation:
 
         # Initialize simulation components and layout
         self._initialize_components()
+
+        # Save counter
+        self.save_counter = 0
 
     def _initialize_components(self):
         """Initializes simulation components and layout"""
@@ -96,6 +98,8 @@ class Simulation:
                 self.menu.prep_layout_design_menu()
                 self.menu.prep_manual_control()
                 self.menu.prep_autonomous_exp()
+                self.menu.prep_autonomous_navigation()
+                self.menu.prep_visualization()
 
             # Update the screen
             self._update_screen()
@@ -106,131 +110,206 @@ class Simulation:
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_F1:
-                    self.settings.menu_show = not self.settings.menu_show
-                elif event.key == pygame.K_LEFT and self.settings.manual_control:
-                    self.robot.rotate_by_increment(0.174533)
-                elif event.key == pygame.K_RIGHT and self.settings.manual_control:
-                    self.robot.rotate_by_increment(-0.174533)
-                elif event.key == pygame.K_UP and self.settings.manual_control:
-                    self.robot.moving_forward = True
-                elif event.key == pygame.K_DOWN and self.settings.manual_control:
-                    self.robot.moving_backward = True
-                elif event.key == pygame.K_SPACE and self.settings.manual_control:
-                    self._emit_laser_beams()
-                elif event.key == pygame.K_c and self.settings.manual_control:
-                    self.map.flag_cluster_growing = True
-                    self.map.growing_cluster((self.robot.odo_x, self.robot.odo_y))
-                elif event.key == pygame.K_o and self.settings.manual_control:
-                    self.map.flag_obstacle_detection = True
-                    self.map.detecting_obstacles()
-                elif event.key == pygame.K_m:
-                    self.settings.layout_design = False
-                    self.settings.autonomous_exploration = False
-                    self.settings.autonomous_navigation = False
-                    self.settings.manual_control = True
-                elif event.key == pygame.K_e:
-                    self.settings.layout_design = False
-                    self.settings.autonomous_navigation = False
-                    self.settings.manual_control = False
-                    self.settings.autonomous_exploration = True
-                elif event.key == pygame.K_a:
-                    self.settings.layout_design = False
-                    self.settings.manual_control = False
-                    self.settings.autonomous_exploration = False
-                    self.settings.autonomous_navigation = True
-                elif event.key == pygame.K_l:
-                    self.settings.autonomous_navigation = False
-                    self.settings.manual_control = False
-                    self.settings.autonomous_exploration = False
-                    self.settings.layout_design = True
-                elif event.key == pygame.K_g and self.settings.layout_design:
-                    self.settings.layout_grids = not self.settings.layout_grids
-                elif event.key == pygame.K_f and self.settings.layout_design:
-                    self._load_layout_from_file()
+                self._check_keydown_events(event)
             elif event.type == pygame.KEYUP and self.settings.manual_control:
-                if event.key == pygame.K_UP:
-                    self.robot.moving_forward = False
-                if event.key == pygame.K_DOWN:
-                    self.robot.moving_backward = False
+                self._check_keyup_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN and self.settings.layout_design:
-                # Left mouse click
-                if event.button == 1:
-                    x, y = pygame.mouse.get_pos()
-                    if self.settings.layout_grids:
-                        x = (self.settings.layout_object_size / 2) + (int(x / self.settings.layout_object_size) * self.settings.layout_object_size)
-                        y = (self.settings.layout_object_size / 2) + (int(y / self.settings.layout_object_size) * self.settings.layout_object_size)
-                    x_in_range = 0 + (self.settings.layout_object_size / 2) <= x <= self.settings.layout_width - (self.settings.layout_object_size / 2)
-                    y_in_range = 0 + (self.settings.layout_object_size / 2) <= y <= self.settings.layout_height - (self.settings.layout_object_size / 2)
-                    if x_in_range and y_in_range:
-                        self.settings.layout["Objects"].add((x, y))
-                        self.objects = pygame.sprite.Group()
-                        for coords in self.settings.layout["Objects"]:
-                            new_object = Object(self, *coords)
-                            self.objects.add(new_object)
-                # Middle mouse click
-                if event.button == 2:
-                    x, y = pygame.mouse.get_pos()
-                    x_in_range = 0 + self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
-                    y_in_range = 0 + self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
-                    if x_in_range and y_in_range:
-                        # Clear the targets and the path
-                        self.settings.layout["Targets"].clear()
-                        self.map.path.clear()
-                        # Transfer the coordinates into the origin of the robot's coordinate system
-                        loc_x = x - self.robot.init_x
-                        loc_y = y - self.robot.init_y
-                        # Rotate the coordinates in the robot's coordinate system
-                        theta = self.robot.init_o + (np.pi / 2)
-                        rot_x = loc_x * np.cos(theta) - loc_y * np.sin(theta)
-                        rot_y = loc_x * np.sin(theta) + loc_y * np.cos(theta)
-                        # Add the coordinates to the layout
-                        self.settings.layout["Targets"].append((rot_x, rot_y))
-                # Right mouse click
-                if event.button == 3:
-                    x, y = pygame.mouse.get_pos()
-                    x_in_range = 0 + self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
-                    y_in_range = 0 + self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
-                    if x_in_range and y_in_range:
-                        self.settings.layout["Robots"].clear()
-                        self.settings.layout["Robots"].add((x, y))
-                        self.robots.empty()
-                        for coords in self.settings.layout["Robots"]:
-                            self.robot = Robot(self, *coords)
-                            self.map.robot = self.robot
-                            self.display.robot = self.robot
-                            self.robots.add(self.robot)
+                self._check_mouse_events(event)
+
+    def _check_keydown_events(self, event):
+        """Respond to key presses"""
+        # Show and hide the menu
+        if event.key == pygame.K_F1:
+            self.settings.menu_show = not self.settings.menu_show
+
+        # Rotate the robot by increment
+        elif event.key == pygame.K_LEFT and self.settings.manual_control:
+            self.robot.rotate_by_increment(0.174533)
+        elif event.key == pygame.K_RIGHT and self.settings.manual_control:
+            self.robot.rotate_by_increment(-0.174533)
+
+        # Moves the robot forwards and backwards
+        elif event.key == pygame.K_UP and self.settings.manual_control:
+            self.robot.moving_forward = True
+        elif event.key == pygame.K_DOWN and self.settings.manual_control:
+            self.robot.moving_backward = True
+
+        # Emits laser beams
+        elif event.key == pygame.K_SPACE and self.settings.manual_control:
+            self._emit_laser_beams()
+
+        # Grows a cluster at the position of the robot
+        elif event.key == pygame.K_c and self.settings.manual_control:
+            self.map.flag_cluster_growing = True
+            self.map.growing_cluster((self.robot.odo_x, self.robot.odo_y))
+
+        # Detects the obstacles
+        elif event.key == pygame.K_o and self.settings.manual_control:
+            self.map.flag_obstacle_detection = True
+            self.map.detecting_obstacles()
+
+        # Turns the manual control ON / OFF
+        elif event.key == pygame.K_m:
+            self.settings.layout_design = False
+            self.settings.autonomous_exploration = False
+            self.settings.autonomous_navigation = False
+            self.settings.manual_control = True
+
+        # Turns the autonomous exploration ON / OFF
+        elif event.key == pygame.K_e:
+            self.settings.layout_design = False
+            self.settings.autonomous_navigation = False
+            self.settings.manual_control = False
+            self.settings.autonomous_exploration = True
+
+        # Turns the autonomous navigation ON / OFF
+        elif event.key == pygame.K_a:
+            self.settings.layout_design = False
+            self.settings.manual_control = False
+            self.settings.autonomous_exploration = False
+            self.settings.autonomous_navigation = True
+
+        # Turns the layout designer ON / OFF
+        elif event.key == pygame.K_l:
+            self.settings.autonomous_navigation = False
+            self.settings.manual_control = False
+            self.settings.autonomous_exploration = False
+            self.settings.layout_design = True
+
+        # Turns the grids ON / OFF
+        elif event.key == pygame.K_g and self.settings.layout_design:
+            self.settings.layout_grids = not self.settings.layout_grids
+
+        # Loads the layout from file
+        elif event.key == pygame.K_f and self.settings.layout_design:
+            self._load_layout_from_file()
+
+        # Visualization options
+        elif event.key == pygame.K_F2:
+            self.settings.map_draw_lidar_points = not self.settings.map_draw_lidar_points
+        elif event.key == pygame.K_F3:
+            self.settings.map_draw_obstacles = not self.settings.map_draw_obstacles
+        elif event.key == pygame.K_F4:
+            self.settings.map_draw_all_clusters = not self.settings.map_draw_all_clusters
+            self.settings.map_draw_last_cluster = False
+        elif event.key == pygame.K_F5:
+            self.settings.map_draw_last_cluster = not self.settings.map_draw_last_cluster
+            self.settings.map_draw_all_clusters = False
+        elif event.key == pygame.K_F6:
+            self.settings.map_draw_exploration_points = not self.settings.map_draw_exploration_points
+
+    def _check_keyup_events(self, event):
+        """Responds to key releases"""
+        # Stops the robot's forward or backward movement
+        if event.key == pygame.K_UP:
+            self.robot.moving_forward = False
+        if event.key == pygame.K_DOWN:
+            self.robot.moving_backward = False
+
+    def _check_mouse_events(self, event):
+        """Responds to mouse events"""
+        # Gets the current position of the mouse
+        x, y = pygame.mouse.get_pos()
+
+        # Left mouse click - creates and object
+        if event.button == 1:
+            # Recalculates the position based on the grid layer if the grids are ON
+            if self.settings.layout_grids:
+                x = (self.settings.layout_object_size / 2) + (int(x / self.settings.layout_object_size) * self.settings.layout_object_size)
+                y = (self.settings.layout_object_size / 2) + (int(y / self.settings.layout_object_size) * self.settings.layout_object_size)
+
+            # Checks if the position falls into the layout
+            x_in_range = self.settings.layout_object_size / 2 <= x <= self.settings.layout_width - (self.settings.layout_object_size / 2)
+            y_in_range = self.settings.layout_object_size / 2 <= y <= self.settings.layout_height - (self.settings.layout_object_size / 2)
+            if x_in_range and y_in_range:
+                # Add the position of the object to the layout
+                self.settings.layout["Objects"].add((x, y))
+                # Creates a sprite group for the objects
+                self.objects = pygame.sprite.Group()
+                # Add the objects to the sprite group
+                for coords in self.settings.layout["Objects"]:
+                    new_object = Object(self, *coords)
+                    self.objects.add(new_object)
+
+        # Middle mouse click - creates a target point
+        if event.button == 2:
+            # Checks if the position falls into the layout
+            x_in_range = self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
+            y_in_range = self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
+            if x_in_range and y_in_range:
+                # Clear the targets and the path
+                self.settings.layout["Targets"].clear()
+                self.map.path.clear()
+                # Transfer the coordinates into the origin of the robot's coordinate system
+                loc_x = x - self.robot.init_x
+                loc_y = y - self.robot.init_y
+                # Rotate the coordinates in the robot's coordinate system
+                theta = self.robot.init_o + (np.pi / 2)
+                rot_x = loc_x * np.cos(theta) - loc_y * np.sin(theta)
+                rot_y = loc_x * np.sin(theta) + loc_y * np.cos(theta)
+                # Add the coordinates to the layout
+                self.settings.layout["Targets"].append((rot_x, rot_y))
+
+        # Right mouse click - replaces the robot
+        if event.button == 3:
+            # Checks if the position falls into the layout
+            x_in_range = self.settings.layout_robot_size <= x <= self.settings.layout_width - self.settings.layout_robot_size
+            y_in_range = self.settings.layout_robot_size <= y <= self.settings.layout_height - self.settings.layout_robot_size
+            if x_in_range and y_in_range:
+                self._replacing_the_robot(x, y)
 
     def _load_layout_from_file(self):
         """Loads the layout from file"""
         # Loading the objects
         with open("Layout_Objects.txt", "r") as file:
+            # Read all the lines from the file
             lines = file.readlines()
+            # Go through all of them
             for line in lines:
+                # Split the line by whitespace
                 x, y = line.split()
+                # Convert the values to integers
                 x = int(x)
                 y = int(y)
+                # Add the coordinates to the layout
                 self.settings.layout["Objects"].add((x, y))
-                self.objects = pygame.sprite.Group()
-                for coords in self.settings.layout["Objects"]:
-                    new_object = Object(self, *coords)
-                    self.objects.add(new_object)
+            # Create a sprite group for the objects
+            self.objects = pygame.sprite.Group()
+            # Add the objects to the sprite group
+            for coords in self.settings.layout["Objects"]:
+                new_object = Object(self, *coords)
+                self.objects.add(new_object)
 
         # Loading the robots
         with open("Layout_Robots.txt", "r") as file:
+            # Read all the lines from the file
             lines = file.readlines()
+            # Go through all the lines
             for line in lines:
+                # Split the line by whitespace
                 x, y = line.split()
+                # Convert the values to integers
                 x = int(x)
                 y = int(y)
-                self.settings.layout["Robots"].clear()
-                self.settings.layout["Robots"].add((x, y))
-                self.robots.empty()
-                for coords in self.settings.layout["Robots"]:
-                    self.robot = Robot(self, *coords)
-                    self.map.robot = self.robot
-                    self.display.robot = self.robot
-                    self.robots.add(self.robot)
+                # Replace the robot
+                self._replacing_the_robot(x, y)
+
+    def _replacing_the_robot(self, x, y):
+        """Replaces the robot on the layout"""
+        # Clear the robot's layout
+        self.settings.layout["Robots"].clear()
+        # Add the new robot position to the layout
+        self.settings.layout["Robots"].add((x, y))
+        # Clear the robot sprite group
+        self.robots.empty()
+        # Go through all the robots
+        for coords in self.settings.layout["Robots"]:
+            # Add the robot to the sprite group
+            self.robot = Robot(self, *coords)
+            self.robots.add(self.robot)
+            # Update the links to the robot
+            self.map.robot = self.robot
+            self.display.robot = self.robot
 
     def _update_robot(self):
         """Updates the robot"""
@@ -272,14 +351,22 @@ class Simulation:
                     self.map.find_cluster_neighbours()
                     # Create navigation nodes
                     self.map.create_navigation_nodes()
-                    # Turn on cluster drawing all the clusters
-                    self.settings.map_draw_all_clusters = True
                     # Turn off the autonomous exploration
                     self.settings.autonomous_exploration = False
+        # Check if autonomous navigation is active and the robot reached the target
         elif self.settings.autonomous_navigation and self.robot.target_reached:
+            # Check if there is any target
             if self.settings.layout["Targets"]:
+                # Creat a motion path to the target from the current position
                 self.map.path_planner((self.robot.odo_x, self.robot.odo_y), self.settings.layout["Targets"].pop())
-
+            # Check if there is any navigation node in the path
+            elif self.map.path:
+                # Get the new target
+                target = self.map.path.pop()
+                # Set the robot's target
+                self.robot.target_x = target[0]
+                self.robot.target_y = target[1]
+                self.robot.target_reached = False
 
         # Check if the robot is not sensing and the target is not reached
         if not self.robot.target_reached and not self.robot.sensing:
@@ -419,7 +506,6 @@ class Simulation:
             if self.settings.autonomous_exploration:
                 # Turn the sensing on and clear the clusters
                 self.robot.sensing = True
-                #self.map.clusters.clear()
             return False
 
     def _calculate_robot_position(self):
@@ -560,6 +646,13 @@ class Simulation:
         # Make the most recent drawn screen visible
         pygame.display.flip()
 
+        # Saving an image from the screen
+        if (self.save_counter % self.settings.save_interval) == 0:
+            file_name = self.settings.save_folder + self.settings.save_image_name + "_" + str(self.save_counter) + ".jpg"
+            pygame.image.save(self.screen, file_name)
+
+        # Increase the save counter
+        self.save_counter += 1
 
 if __name__ == '__main__':
     # Make a simulation instance and run it

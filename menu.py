@@ -1,5 +1,6 @@
 import pygame
 
+
 class Menu:
     """A class to show the menu"""
 
@@ -27,6 +28,7 @@ class Menu:
         self.prep_manual_control()
         self.prep_autonomous_exp()
         self.prep_autonomous_navigation()
+        self.prep_visualization()
 
     def prep_menu_line(self):
         """Prepares the menu line"""
@@ -67,7 +69,7 @@ class Menu:
         self.load_rect.left = self.grid_rect.left
         self.load_rect.top = self.grid_rect.bottom + self.line_gap
 
-        mouse_str = "Mouse buttons: left (object), right (robot)"
+        mouse_str = "Mouse buttons: left (object), middle (target), right (robot)"
         # Prepare the image and positions it on the screen
         self.mouse_image = self.font.render(mouse_str, True, self.text_color_basic, self.bg_color)
         self.mouse_rect = self.mouse_image.get_rect()
@@ -148,6 +150,65 @@ class Menu:
         self.nav_rect.left = self.exp_rect.left
         self.nav_rect.top = self.exp_rect.bottom + self.line_gap
 
+    def prep_visualization(self):
+        """Prepares the menu for the visualization options"""
+        vis_str = "Visualization Options"
+        # Prepare the image and positions it on the screen
+        self.vis_image = self.font.render(vis_str, True, self.text_color_basic, self.bg_color)
+        self.vis_rect = self.nav_image.get_rect()
+        self.vis_rect.left = self.nav_rect.left
+        self.vis_rect.top = self.nav_rect.bottom + self.line_gap
+
+        if self.settings.map_draw_lidar_points:
+            lidar_str = "Lidar Points (F2): ON"
+        else:
+            lidar_str = "Lidar Points (F2): OFF"
+        # Prepare the image and positions it on the screen
+        self.lidar_image = self.font.render(lidar_str, True, self.text_color_basic, self.bg_color)
+        self.lidar_rect = self.lidar_image.get_rect()
+        self.lidar_rect.left = self.vis_rect.left + 3 * self.line_gap
+        self.lidar_rect.top = self.vis_rect.bottom + self.line_gap
+
+        if self.settings.map_draw_obstacles:
+            obs_str = "Obstacles (F3): ON"
+        else:
+            obs_str = "Obstacles (F3): OFF"
+        # Prepare the image and positions it on the screen
+        self.obs_image = self.font.render(obs_str, True, self.text_color_basic, self.bg_color)
+        self.obs_rect = self.obs_image.get_rect()
+        self.obs_rect.left = self.lidar_rect.left
+        self.obs_rect.top = self.lidar_rect.bottom + self.line_gap
+
+        if self.settings.map_draw_all_clusters:
+            all_cluster_str = "All Cluster (F4): ON"
+        else:
+            all_cluster_str = "All Cluster (F4): OFF"
+        # Prepare the image and positions it on the screen
+        self.all_cluster_image = self.font.render(all_cluster_str, True, self.text_color_basic, self.bg_color)
+        self.all_cluster_rect = self.all_cluster_image.get_rect()
+        self.all_cluster_rect.left = self.obs_rect.left
+        self.all_cluster_rect.top = self.obs_rect.bottom + self.line_gap
+
+        if self.settings.map_draw_last_cluster:
+            last_cluster_str = "Last Cluster (F5): ON"
+        else:
+            last_cluster_str = "Last Cluster (F5): OFF"
+        # Prepare the image and positions it on the screen
+        self.last_cluster_image = self.font.render(last_cluster_str, True, self.text_color_basic, self.bg_color)
+        self.last_cluster_rect = self.last_cluster_image.get_rect()
+        self.last_cluster_rect.left = self.all_cluster_rect.left
+        self.last_cluster_rect.top = self.all_cluster_rect.bottom + self.line_gap
+
+        if self.settings.map_draw_exploration_points:
+            exp_point_str = "Exploration Points (F6): ON"
+        else:
+            exp_point_str = "Exploration Points (F6): OFF"
+        # Prepare the image and positions it on the screen
+        self.exp_point_image = self.font.render(exp_point_str, True, self.text_color_basic, self.bg_color)
+        self.exp_point_rect = self.exp_point_image.get_rect()
+        self.exp_point_rect.left = self.last_cluster_rect.left
+        self.exp_point_rect.top = self.last_cluster_rect.bottom + self.line_gap
+
     def show_menu(self):
         """Shows the menu"""
         self.screen.blit(self.menu_image, self.menu_rect)
@@ -164,3 +225,9 @@ class Menu:
             self.screen.blit(self.obstacle_image, self.obstacle_rect)
             self.screen.blit(self.exp_image, self.exp_rect)
             self.screen.blit(self.nav_image, self.nav_rect)
+            self.screen.blit(self.vis_image, self.vis_rect)
+            self.screen.blit(self.lidar_image, self.lidar_rect)
+            self.screen.blit(self.obs_image, self.obs_rect)
+            self.screen.blit(self.all_cluster_image, self.all_cluster_rect)
+            self.screen.blit(self.last_cluster_image, self.last_cluster_rect)
+            self.screen.blit(self.exp_point_image, self.exp_point_rect)
