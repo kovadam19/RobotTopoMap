@@ -55,12 +55,17 @@ A typical run covers the following steps:
     1. Turn off the visualization on all clusters (F4)
 1. Running the autonomous navigation (A)
 
+On the following example the layout was loaded from file. 
+There was 35 exploration steps and then, three targets were defined for autonomous navigation.
 
+![BasicTest](documentation/Test_Basic.gif)
 
+On the following example the layout was created interactively.
+First the robot was replaced to the bottom-left corner.
+Then a corridor like layout was created while the grids were turned on.
+At the end two target points were defined for autonomous navigation.
 
-
-
-
+![CorridorTest](documentation/Test_Corridor.gif)
 
 ## Simulation components & settings
 In this section we go through the simulation components, their working principles and settings.
