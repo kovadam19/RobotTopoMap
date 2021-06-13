@@ -308,7 +308,7 @@ To do so, the following steps take place:
 When the robot knows the path to the target, we set the path points as a target for the robot one by one until the robot reaches the end point.
 
 On the following figure the robot moves from the top-right corner to the bottom-left corner.
-The navigation path is marked by white squares.
+The navigation path is marked by white squares on the map.
 
 ![Astar](documentation/A_Star.jpg "A*")
 
