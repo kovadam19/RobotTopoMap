@@ -340,7 +340,7 @@ class Simulation:
                     if self.map.detecting_obstacles():
                         # Grow a cluster at the location of the robot
                         if self.map.growing_cluster((self.robot.target_x, self.robot.target_y),
-                                                    aspect_ratio_multiplier=1.0,
+                                                    aspect_ratio_multiplier=self.settings.map_cluster_aspect_ratio,
                                                     max_distance=self.settings.lidar_sensing_distance):
                             # Calculate a new exploration target
                             self._calculate_new_exploration_target()
@@ -352,7 +352,7 @@ class Simulation:
                     self.map.detecting_obstacles()
                     # Grow the final cluster
                     self.map.growing_cluster((self.robot.target_x, self.robot.target_y),
-                                             aspect_ratio_multiplier=1.0,
+                                             aspect_ratio_multiplier=self.settings.map_cluster_aspect_ratio,
                                              max_distance=self.settings.lidar_sensing_distance)
                     # Merging intersecting clusters
                     self.map.merging_clusters()

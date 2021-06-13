@@ -8,18 +8,18 @@ class Settings:
         """Initialize the settings"""
 
         # Screen settings
-        self.screen_width = 1600
-        self.screen_height = 800
+        self.screen_width = 1600  # Do not modify!
+        self.screen_height = 800  # Do not modify!
         self.bg_color = (255, 255, 255)
 
         # Layout settings
         self.layout_object_filename = "Layout_Objects.txt"
         self.layout_robot_filename = "Layout_Robots.txt"
-        self.layout_width = self.screen_width / 2
-        self.layout_height = self.screen_height
-        self.layout_object_size = 38
-        self.layout_robot_size = 76
-        self.layout_grids = False
+        self.layout_width = self.screen_width / 2   # Do not modify!
+        self.layout_height = self.screen_height   # Do not modify!
+        self.layout_object_size = 38  # Do not modify!
+        self.layout_robot_size = 76  # Do not modify!
+        self.layout_grids = False   # Do not modify!
         self.layout = {"Objects": set(),
                        "Robots": set(),
                        "Targets": []}
@@ -38,13 +38,14 @@ class Settings:
         self.laser_number = 100
 
         # LIDAR settings
-        self.lidar_position = 33  # Do not change!
+        self.lidar_position = 33  # Do not modify!
         self.lidar_view_angle = 2 * (np.pi / 3)
         self.lidar_sensing_distance = 200
         self.lidar_sensing_counter = 6
 
         # Map settings
         self.map_cell_size = 20
+        self.map_cluster_aspect_ratio = 1.0
         self.map_font_size = 16
         self.map_target_size = 8
         self.map_coverage_threshold = 0.95
@@ -60,11 +61,11 @@ class Settings:
         self.map_text_color = (0, 255, 0)
         self.map_x_axis_color = (255, 0, 0)
         self.map_y_axis_color = (0, 255, 0)
-        self.map_draw_lidar_points = False
-        self.map_draw_obstacles = True
-        self.map_draw_all_clusters = False
-        self.map_draw_last_cluster = True
-        self.map_draw_exploration_points = True
+        self.map_draw_lidar_points = False  # Do not modify!
+        self.map_draw_obstacles = True  # Do not modify!
+        self.map_draw_all_clusters = False  # Do not modify!
+        self.map_draw_last_cluster = True  # Do not modify!
+        self.map_draw_exploration_points = True  # Do not modify!
 
         # Display settings
         self.display_bg_color = (0, 0, 0)
@@ -75,7 +76,7 @@ class Settings:
         self.display_line_gap = 4
 
         # Menu settings
-        self.menu_show = True
+        self.menu_show = True  # Do not modify!
         self.menu_bg_color = (255, 255, 255)
         self.menu_font_size = 16
         self.menu_text_color_basic = (0, 0, 0)
@@ -85,10 +86,10 @@ class Settings:
         self.menu_line_gap = 4
 
         # Control settings
-        self.layout_design = False
-        self.manual_control = False
-        self.autonomous_exploration = False
-        self.autonomous_navigation = False
+        self.layout_design = False  # Do not modify!
+        self.manual_control = False  # Do not modify!
+        self.autonomous_exploration = False  # Do not modify!
+        self.autonomous_navigation = False  # Do not modify!
 
         # Autonomous exploration settings
         self.ae_exploration_steps = 30
