@@ -27,6 +27,8 @@ There are four main control modes:
 * Autonomous exploration: in this mode the robot makes a predefined amount of exploration step.
 * Autonomous navigation: in this mode the robot navigates from its current location to the target location.
 
+The program was developed on Windows 10 platform by using [PyCharm 2021.1.2](https://www.jetbrains.com/pycharm/).
+
 ![MainScreen](documentation/ShortDescriptionScreen.jpg "Main Screen")
 
 ## Usage & testing
