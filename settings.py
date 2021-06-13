@@ -92,7 +92,7 @@ class Settings:
         self.autonomous_navigation = False  # Do not modify!
 
         # Autonomous exploration settings
-        self.ae_exploration_steps = 30
+        self.ae_exploration_steps = 35
         self.ae_safety_zone_multiplier = 0.6  # Size of the robot is multiplied by this
         self.ae_counter_limit = 100  # Limit of tries with one setting of requirements (angle, distance)
         self.ae_initial_angle = 0.349066  # 20 deg (0.349066 rad)
@@ -101,7 +101,7 @@ class Settings:
         self.ae_distance_increment = 1
 
         # Save settings
-        self.save_folder = "C:/Users/kovad/Desktop/Test_3/"
+        self.save_folder = "C:/Users/kovad/Desktop/Test_5/"
         self.save_image_name = "image"
         self.save_file_extension = ".jpg"
-        self.save_interval = 5
+        self.save_interval = 100

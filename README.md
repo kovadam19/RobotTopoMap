@@ -29,6 +29,39 @@ There are four main control modes:
 
 ![MainScreen](documentation/ShortDescriptionScreen.jpg "Main Screen")
 
+## Usage & testing
+A typical run covers the following steps:
+1. Defining the settings in *settings.py*
+   1. Layout input files
+        * Layout object file name
+        * Layout robot file name
+   1. Number of exploration steps 
+   1. Saving settings
+        * Folder, file name, file extension
+        * Save interval
+1. Running the Python script: *main.py*
+1. Creating a layout, after pressing (L):
+    * Loading it from file (F)
+    * Creating interactively
+        * Grids (G)
+        * Mouse buttons
+1. Running the autonomous exploration (E)
+1. Defining a target point for autonomous navigation
+    1. Turning off the visualization of the exploration points (F6)
+    1. Visualising all the clusters (F4)
+    1. Activating the layout design (L)
+    1. Creating a target with the middle mouse button
+        * It has to fall within a cluster, otherwise nothing will happen
+    1. Turn off the visualization on all clusters (F4)
+1. Running the autonomous navigation (A)
+
+
+
+
+
+
+
+
 ## Simulation components & settings
 In this section we go through the simulation components, their working principles and settings.
 ### Robot
@@ -354,16 +387,28 @@ The obstacle detection can be activated by pushing the O button.
 The program is not designed to handle these type of actions.
 
 ### Autonomous exploration
-In this mode the robot attempts to explore its world. This works in the following way:
-1. The robot turns 360 degrees stepwise
-    * 
+In this mode the robot attempts to explore its world.
+This mode is described in previous sections.
+
+### Autonomous navigation
+In this mode the robot attempts to navigate from the current position to a target position.
+This mode is described in previous sections.
+
+### Visualization options
+During the simulation the visualization of map components can be turned ON / OFF by using F2 to F6 buttons. 
+
+An example is shown below:
+* The obstacles are visualized by various colors.
+* The last cluster is visualized by pink color.
+* The robot's actual position is visualized by a green dot.
+* The previous exploration points are visualized by blue dots and their number above them.
+* The next exploration point (where the robot is moving to) is visualized by a yellow dot with its number above it.
+
+*Note*: It is recommended to visualize only the components of interest since it can slow the simulation down.
+
+![Visualization](documentation/Visualization.jpg "Visualization")
 
 ## References
 1. [Blochlinger et al (2017): Topomap: Topological Mapping and Navigation Based on Visual SLAM Maps](https://ieeexplore.ieee.org/document/8460641).
-
-
-
-
-
-
-
+1. [A* search algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
+1. [Quick hull algorithm](https://en.wikipedia.org/wiki/Quickhull)
