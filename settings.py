@@ -25,7 +25,7 @@ class Settings:
                        "Targets": []}
 
         # Robot settings
-        self.robot_rotation_increment = 0.0872665  # radians
+        self.robot_rotation_increment = 0.0872665  # Radians, do not change!
         self.robot_speed = 0.1
         self.robot_target_distance_tolerance = 0.1
         self.robot_orientation_tolerance = 0.0001
@@ -38,7 +38,7 @@ class Settings:
         self.laser_number = 100
 
         # LIDAR settings
-        self.lidar_position = 33
+        self.lidar_position = 33  # Do not change!
         self.lidar_view_angle = 2 * (np.pi / 3)
         self.lidar_sensing_distance = 200
         self.lidar_sensing_counter = 6
@@ -100,7 +100,7 @@ class Settings:
         self.ae_distance_increment = 1
 
         # Save settings
-        self.save_folder = "C:/Users/kovad/Desktop/Save/"
+        self.save_folder = "C:/Users/kovad/Desktop/Test_3/"
         self.save_image_name = "image"
         self.save_file_extension = ".jpg"
-        self.save_interval = 100
+        self.save_interval = 5
