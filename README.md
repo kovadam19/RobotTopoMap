@@ -286,6 +286,11 @@ When the autonomous exploration is completed the following algorithm takes place
         1. Calculate the center point of the intersecting region (portal point by [Blochlinger et al (2017): Topomap: Topological Mapping and Navigation Based on Visual SLAM Maps](https://ieeexplore.ieee.org/document/8460641))
         1. Add this point to the navigation nodes
     
+On the following figure, you can see how the number of clusters was decreased from the initial 30 (number of exploration steps) to 7 by merging clusters and removing the highly covered ones.
+The red dots represent the navigation nodes that the robot can use to define the path from one location to another.
+
+![Navigation](documentation/Navigation.jpg "Navigation")
+
 At this point the robot has a simplified map with larger (merged) clusters and navigation nodes.
 The next step is to define the path from the current location to the target points.
 To do so, the following steps take place:
@@ -302,10 +307,10 @@ To do so, the following steps take place:
 
 When the robot knows the path to the target, we set the path points as a target for the robot one by one until the robot reaches the end point.
 
-On the following figure, you can see how the number of clusters was decreased from the initial 30 (number of exploration steps) to 7 by merging clusters and removing the highly covered ones.
-The red dots represent the navigation nodes that the robot can use to define the path from one location to another.
+On the following figure the robot moves from the top-right corner to the bottom-left corner.
+The navigation path is marked by white squares.
 
-![Navigation](documentation/Navigation.jpg "Navigation")
+![Astar](documentation/A_Star.jpg "A*")
 
 ## User interface and controls
 After the program is executed the startup screen shows up, see below! On the left side we can see the active menu and the robot in the center of the layout. 
