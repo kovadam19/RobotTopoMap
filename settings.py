@@ -13,6 +13,8 @@ class Settings:
         self.bg_color = (255, 255, 255)
 
         # Layout settings
+        self.layout_object_filename = "Layout_Objects.txt"
+        self.layout_robot_filename = "Layout_Robots.txt"
         self.layout_width = self.screen_width / 2
         self.layout_height = self.screen_height
         self.layout_object_size = 38
@@ -100,4 +102,5 @@ class Settings:
         # Save settings
         self.save_folder = "C:/Users/kovad/Desktop/Save/"
         self.save_image_name = "image"
+        self.save_file_extension = ".jpg"
         self.save_interval = 100

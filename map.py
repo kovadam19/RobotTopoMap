@@ -467,7 +467,8 @@ class Map:
         # Check if the start and end point fall into the same cluster
         if start_cluster == end_cluster:
             self.path.append(end)
-        else:
+        # Check if the end point falls into a cluster
+        elif end_cluster is not None:
             # Add the start and end nodes to the cluster temporarily
             self.clusters[start_cluster].navigation_node_positions.add(start)
             self.clusters[end_cluster].navigation_node_positions.add(end)

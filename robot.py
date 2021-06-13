@@ -1,3 +1,13 @@
+##################################################
+# Project: Robot Topological Mapping
+# Author: Adam Kovacs
+# Version: 1.0.0
+# Maintainer: Adam Kovacs
+# E-mail: kovadam19@gmail.com
+# Released: 13 June 2021
+##################################################
+
+# Generic/Built-in imports
 import numpy as np
 import copy
 import pygame

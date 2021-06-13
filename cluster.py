@@ -1,26 +1,30 @@
-import pygame
+##################################################
+# Project: Robot Topological Mapping
+# Author: Adam Kovacs
+# Version: 1.0.0
+# Maintainer: Adam Kovacs
+# E-mail: kovadam19@gmail.com
+# Released: 13 June 2021
+##################################################
+
+# Generic/Built-in imports
 import random
 from scipy.spatial import ConvexHull
 import numpy as np
 
-from pygame.sprite import Sprite
 
-
-class Cluster(Sprite):
+class Cluster:
     """A class to manage convex clusters on the robot's map"""
 
-    def __init__(self, centerX, centerY):
+    def __init__(self, center_x, center_y):
         """Create a cluster on to the robot's map"""
-        # Initialize the sprite
-        super().__init__()
-
         # Center coordinates
-        self.centerX = centerX
-        self.centerY = centerY
+        self.centerX = center_x
+        self.centerY = center_y
 
         # Outermost X coordinates
-        self.x_min = centerX
-        self.x_max = centerX
+        self.x_min = center_x
+        self.x_max = center_x
 
         # Color
         red = int(random.random() * 255)
@@ -122,8 +126,10 @@ class Cluster(Sprite):
         self.centerY = np.mean(y_coords)
 
     def point_in_cluster(self, point, tolerance=1e-12):
-        """Checks if a point falls into a given convex hull of the cluster. Returns True or False.
-        Implemented from: https://stackoverflow.com/a/42165596"""
+        """
+            Checks if a point falls into a given convex hull of the cluster. Returns True or False.
+            Implemented from: https://stackoverflow.com/a/42165596
+        """
         # Calculate the convex hull for the cluster
         hull = ConvexHull(list(self.cells))
         # Check if the point is in the hull

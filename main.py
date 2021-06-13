@@ -1,8 +1,19 @@
+##################################################
+# Project: Robot Topological Mapping
+# Author: Adam Kovacs
+# Version: 1.0.0
+# Maintainer: Adam Kovacs
+# E-mail: kovadam19@gmail.com
+# Released: 13 June 2021
+##################################################
+
+# Generic/Built-in imports
 import sys
 import pygame
 import numpy as np
 import random
 
+# Other modules
 from settings import Settings
 from robot import Robot
 from laser_beam import Beam
@@ -261,7 +272,7 @@ class Simulation:
     def _load_layout_from_file(self):
         """Loads the layout from file"""
         # Loading the objects
-        with open("Layout_Objects.txt", "r") as file:
+        with open(self.settings.layout_object_filename, "r") as file:
             # Read all the lines from the file
             lines = file.readlines()
             # Go through all of them
@@ -281,7 +292,7 @@ class Simulation:
                 self.objects.add(new_object)
 
         # Loading the robots
-        with open("Layout_Robots.txt", "r") as file:
+        with open(self.settings.layout_robot_filename, "r") as file:
             # Read all the lines from the file
             lines = file.readlines()
             # Go through all the lines
@@ -407,7 +418,7 @@ class Simulation:
         if possible_targets:
             # Set the initial variables
             counter = 0
-            angle_limit = self.settings.ae_initial_angle # Angle between the robot current orientation vector and the target vector
+            angle_limit = self.settings.ae_initial_angle  # Angle between the robot current orientation vector and the target vector
             min_distance = self.settings.ae_min_distance  # Minimum distance that the robot has to move
             # Select points until they fulfill the requirements of a target point
             while True:
@@ -648,11 +659,12 @@ class Simulation:
 
         # Saving an image from the screen
         if (self.save_counter % self.settings.save_interval) == 0:
-            file_name = self.settings.save_folder + self.settings.save_image_name + "_" + str(self.save_counter) + ".jpg"
+            file_name = self.settings.save_folder + self.settings.save_image_name + "_" + str(self.save_counter) + self.settings.save_file_extension
             pygame.image.save(self.screen, file_name)
 
         # Increase the save counter
         self.save_counter += 1
+
 
 if __name__ == '__main__':
     # Make a simulation instance and run it
