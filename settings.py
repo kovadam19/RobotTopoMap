@@ -101,7 +101,7 @@ class Settings:
         self.ae_distance_increment = 1
 
         # Save settings
-        self.save_folder = "C:/Users/kovad/Desktop/Test_5/"
+        self.save_folder = "/Test_1/"
         self.save_image_name = "image"
         self.save_file_extension = ".jpg"
         self.save_interval = 100

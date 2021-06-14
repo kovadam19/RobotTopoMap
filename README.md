@@ -9,6 +9,10 @@ An interesting paper on topological mapping crossed my way:
 [Blochlinger et al (2017): Topomap: Topological Mapping and Navigation Based on Visual SLAM Maps](https://ieeexplore.ieee.org/document/8460641).
 After reading the paper, I decided to make a small 2D simulation to implement this mapping approach with [Python](https://www.python.org/).
 
+My certificate:
+
+![Certificate](documentation/Certificate.png "Certificate")
+
 ## Short description
 In the simulation, there is one robot that tries to autonomously explore and navigate in its world. 
 The world is a closed 800 by 800 px layout with square-shaped objects in it. 
